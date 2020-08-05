@@ -1,0 +1,61 @@
+# Notes:
+#   - Minimal appveyor.yml file is an empty file. All sections are optional.
+#   - Indent each level of configuration with 2 spaces. Do not use tabs!
+#   - All section names are case-sensitive.
+#   - Section names should be unique on each level.
+
+#---------------------------------#
+#      general configuration      #
+#---------------------------------#
+
+# version format
+version: 1.0.{build}
+
+# you can use {branch} name in version format too
+# version: 1.0.{build}-{branch}
+
+# branches to build
+branches:
+  # whitelist
+  only:
+    - master
+
+  # blacklist
+  except:
+    - gh-pages
+
+# Do not build on tags (GitHub, Bitbucket, GitLab, Gitea)
+# skip_tags: true
+
+# Start builds on tags only (GitHub, BitBucket, GitLab, Gitea)
+# skip_non_tags: true
+
+image:
+- Visual Studio 2019
+install:
+- cmd: >-
+    if /i "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" (call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64)
+
+# Build script
+#
+build_script:
+   # Build first time
+  - cd CPP/7zip
+  - nmake
+  - cd ../..
+  - cp CPP/7zip/Bundles/Alone/x64/7za.exe .
+  - ls
+
+artifacts:
+  - path: 7za.exe
+
+deploy:
+  - provider: GitHub
+    artifact: 7za.exe
+    draft: false
+    prerelease: false
+    auth_token:
+      secure: W5JGLPCxhmfcrS3+vSZI7BiIUfQ57NPOo08uymwWyN8gpWj5gR7S9pWwUAidWbya
+    on:
+      branch: master                # release from master branch only
+      APPVEYOR_REPO_TAG: true       # deploy on tag push only
